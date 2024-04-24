@@ -597,37 +597,36 @@ One simple solution can be to put all employees' working hours in a list and sor
 [1,3], [2,4], [6,8], [9,12]
 ````
 We can now iterate through these intervals, and whenever we find non-overlapping intervals (e.g., `[2,4]` and `[6,8]`), we can calculate a free interval (e.g., `[4,6]`). 
-````js
-function findEmployeeFreeTime (schedules) {
-  let freeTime = [];
-  
-  //combine all schedules
-  let allTime = []
-  
-  for(let i = 0; i < schedules.length; i++) {
-    for(let j = 0; j <  schedules[i].length; j++) {
-      allTime.push(schedules[i][j])
+````java
+/**
+ * Definition for an interval.
+ * public class Interval {
+ *     int start;
+ *     int end;
+ *     Interval() { start = 0; end = 0; }
+ *     Interval(int s, int e) { start = s; end = e; }
+ * }
+ */
+public class Solution {
+    public List<Interval> employeeFreeTime(List<List<Interval>> schedule) {
+        List<Interval> res = new ArrayList<>();
+        List<Interval> intervals = new ArrayList<>();
+        // Flattening the schedule
+        for (List<Interval> employee : schedule)
+            for (Interval interval : employee)
+                intervals.add(interval);
+        // Sorting by start of each Interval
+        Collections.sort(intervals, (a, b) -> a.start - b.start);
+        int end = intervals.get(0).end;
+        // Checking for free time between intervals
+        for (Interval interval : intervals) {
+            if (interval.start > end)
+                res.add(new Interval(end, interval.start));
+            end = Math.max(end, interval.end);
+        }
+        return res;
     }
-  }
-  allTime.sort((a,b) => a[0]-b[0])
-
-  //merge overlap
-  for(let i = 1; i < allTime.length; i++) {
-    let current = allTime[i]
-    let previous = allTime[i-1]
-   
-    if(current[0] <= previous[1]) {
-      allTime[i] = [previous[0], current[1]]
-      allTime.splice(i-1, 1)
-      i-- 
-    }
-  }
-  //whatever is not accounted for is free time
-  for(let i = 1; i < allTime.length; i++) {
-    freeTime.push([allTime[i-1][1], allTime[i][0]])
-  }
-    return freeTime;
-};
+}
 
 findEmployeeFreeTime ([[[1,3], [5,6]], [[2,3], [6,8]]])//[3,5], Both the employees are free between [3,5].
 findEmployeeFreeTime ([[[1,3], [9,12]], [[2,4]], [[6,8]]])//[4,6], [8,9], All employees are free between [4,6] and [8,9].
